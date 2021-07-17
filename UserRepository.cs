@@ -1,29 +1,35 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace TestApp
 {
-    public class UserRepository
+    class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    class UserRepository
     {
         /// <summary>
         /// Хранилище данных
         /// </summary>
-        static Dictionary<int, string> users = new Dictionary<int, string>
+        List<User> users = new List<User>
         {
-            [0] = "Alex",
-            [2] = "Ann",
-            [1] = "Kate"
+            new User { Name = "Alex", Id = 0 },
+            new User { Name = "Ann", Id = 2 },
+            new User { Name = "Kate", Id = 1 },
         };
 
         /// <summary>
         /// Добавление пользователя в хранилище
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="userName"></param>
-        public static void AddUser(int userId, string userName)
+        /// <param name="user"></param>
+        public void AddUser(User user)
         {
-            users.Add(userId, userName);
+            users.Add(new User { Id = user.Id, Name = user.Name});
         }
 
         /// <summary>
@@ -31,35 +37,36 @@ namespace TestApp
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static string GetUser(int userId)
+        public string GetUser(int userId)
         {
-            return users[userId];
+            foreach (User u in users)
+            {
+                if (u.Id == userId) return u.Name; 
+            }
+            return null;
         }
 
         /// <summary>
         /// Получение отсортированного по UserId списка пользователей
         /// </summary>
         /// <returns></returns>
-        public static SortedDictionary<int, string> GetOrderedUsers()
+        public void GetOrderedUsers()
         {
-            var sortedUsers = new SortedDictionary<int, string>(users);
+            var sortedUsers = users.OrderBy(u => u.Id);
 
-            foreach (var a in sortedUsers)
+            foreach (User u in sortedUsers)
             {
-                Console.WriteLine(a.Key + " - " + a.Value);
+                Console.WriteLine($"{u.Id, 2} - {u.Name}");
             }
-
-            return sortedUsers;
         }
 
         /// <summary>
-        ///  Асинхронная версия метода AddUser()
+        /// Асинхронная версия метода AddUser()
         /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="userName"></param>
-        public static async void AddUserAsync(int userId, string userName)
+        /// <param name="user"></param>
+        public async void AddUserAsync(User user)
         {
-            await Task.Run(() => AddUser(userId, userName));
+            await Task.Run(() => AddUser(user));
         }
 
         /// <summary>
@@ -67,7 +74,7 @@ namespace TestApp
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static async Task<string> GetUserAsync(int userId)
+        public async Task<string> GetUserAsync(int userId)
         {
             return await Task.Run(() => GetUser(userId));
         }
@@ -76,9 +83,9 @@ namespace TestApp
         /// Асинхронная версия метода GetOrderedUsers()
         /// </summary>
         /// <returns></returns>
-        public static async Task<SortedDictionary<int, string>> GetOrderedUsersAsync()
+        public async Task GetOrderedUsersAsync()
         {
-            return await Task.Run(() => GetOrderedUsers());
+            await Task.Run(() => GetOrderedUsers());
         }
     }
 }
